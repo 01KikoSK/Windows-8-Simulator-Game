@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 8 Simulator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Prevent scrolling */
+            background-color: #000; /* Black background for a clean look */
+        }
+
+        /* Custom scrollbar for tile groups */
+        .tile-group-container::-webkit-scrollbar {
+            height: 12px;
+        }
+
+        .tile-group-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .tile-group-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .tile-group-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Custom modal styles (replacing alert/confirm) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+        }
+
+        .modal-buttons {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-600 to-purple-700 h-screen w-screen flex items-center justify-center">
+
+    <!-- Windows 8 Simulator Container -->
+    <div id="simulator-container" class="relative w-full h-full bg-black overflow-hidden flex flex-col rounded-lg shadow-2xl">
+
+        <!-- Start Screen (Visible by default) -->
+        <div id="start-screen" class="absolute inset-0 bg-gradient-to-br from-blue-700 to-indigo-900 p-8 overflow-hidden flex flex-col transition-transform duration-500 transform translate-x-0">
+            <div class="flex-grow overflow-x-auto tile-group-container pb-4">
+                <div class="flex gap-8 h-full">
+                    <!-- Group 1: Core Apps -->
+                    <div class="flex flex-col gap-4 min-w-[300px]">
+                        <h2 class="text-white text-2xl font-semibold mb-4">Essentials</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Mail Tile -->
+                            <div class="tile bg-blue-500 w-32 h-32 rounded-lg shadow-md flex items-center justify-center text-white text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200" data-app="mail">
+                                <span class="text-5xl">✉️</span>
+                                <span class="absolute bottom-2 left-2 text-xs font-medium">Mail</span>
+                            </div>
+                            <!-- Calendar Tile -->
+                            <div class="tile bg-red-500 w-32 h-32 rounded-lg shadow-md flex items-center justify-center text-white text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200" data-app="calendar">
+                                <span class="text-5xl">📅</span>
+                                <span class="absolute bottom-2 left-2 text-xs font-medium">Calendar</span>
+                            </div>
+                            <!-- Photos Tile -->
+                            <div class="tile bg-green-500 w-32 h-32 rounded-lg shadow-md flex items-center justify-center text-white text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200" data-app="photos">
+                                <span class="text-5xl">🏞️</span>
+                                <span class="absolute bottom-2 left-2 text-xs font-medium">Photos</span>
+                            </div>
+                            <!-- Store Tile -->
+                            <div class="tile bg-purple-500 w-32 h-32 rounded-lg shadow-md flex items-center justify-center text-white text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200" data-app="store">
+                                <span class="text-5xl">🛍️</span>
+                                <span class="absolute bottom-2 left-2 text-xs font-medium">Store</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Group 2: Entertainment -->
+                    <div class="flex flex-col gap-4 min-w-[300px]">
+                        <h2 class="text-white text-2xl font-semibold mb-4">Entertainment</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Music Tile (Wide) -->
+                            <div class="tile bg-orange-500 w-68 h-32 rounded-lg shadow-md flex items-center justify-center text-white text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200 col-span-2" data-app="music">
+                                <span class="text-5xl">🎵</span>
+                                <span class="absolute bottom-2 left-2 text-xs font-medium">Music</span>
+                            </div>
+                            <!-- Videos Tile -->
+                            <div class="tile bg-pink-500 w-32 h-32 rounded-lg shadow-md flex items-center justify-center text-white text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200" data-app="videos">
+                                <span class="text-5xl">🎬</span>
+                                <span class="absolute bottom-2 left-2 text-xs font-medium">Videos</span>
+                            </div>
+                            <!-- Games Tile -->
+                            <div class="tile bg-teal-500 w-32 h-32 rounded-lg shadow-md flex items-center justify-center text-white text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200" data-app="games">
+                                <span class="text-5xl">🎮</span>
+                                <span class="absolute bottom-2 left-2 text-xs font-medium">Games</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Group 3: Productivity -->
+                    <div class="flex flex-col gap-4 min-w-[300px]">
+                        <h2 class="text-white text-2xl font-semibold mb-4">Productivity</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Word Tile -->
+                            <div class="tile bg-indigo-500 w-32 h-32 rounded-lg shadow-md flex items-center justify-center text-white text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200" data-app="word">
+                                <span class="text-5xl">📝</span>
+                                <span class="absolute bottom-2 left-2 text-xs font-medium">Word</span>
+                            </div>
+                            <!-- Excel Tile -->
+                            <div class="tile bg-emerald-500 w-32 h-32 rounded-lg shadow-md flex items-center justify-center text-white text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200" data-app="excel">
+                                <span class="text-5xl">📊</span>
+                                <span class="absolute bottom-2 left-2 text-xs font-medium">Excel</span>
+                            </div>
+                            <!-- PowerPoint Tile -->
+                            <div class="tile bg-amber-500 w-32 h-32 rounded-lg shadow-md flex items-center justify-center text-white text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200" data-app="powerpoint">
+                                <span class="text-5xl">📈</span>
+                                <span class="absolute bottom-2 left-2 text-xs font-medium">PowerPoint</span>
+                            </div>
+                            <!-- Edge Tile -->
+                            <div class="tile bg-blue-600 w-32 h-32 rounded-lg shadow-md flex items-center justify-center text-white text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200" data-app="edge">
+                                <span class="text-5xl">🌐</span>
+                                <span class="absolute bottom-2 left-2 text-xs font-medium">Edge</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Start Screen Bottom Bar (Power/Desktop) -->
+            <div class="absolute bottom-0 left-0 right-0 h-16 bg-black bg-opacity-30 flex items-center justify-between px-8">
+                <div class="flex items-center gap-4">
+                    <button id="power-button" class="text-white text-2xl hover:text-gray-300 transition-colors duration-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H5a3 3 0 01-3-3v-10a3 3 0 013-3h5a3 3 0 013 3v1"/>
+                        </svg>
+                    </button>
+                    <span id="current-time-start" class="text-white text-xl font-medium"></span>
+                </div>
+                <button id="desktop-button-start" class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-opacity-30 transition-colors duration-200 shadow-lg">
+                    Desktop
+                </button>
+            </div>
+        </div>
+
+        <!-- Desktop Screen (Initially hidden) -->
+        <div id="desktop-screen" class="absolute inset-0 bg-cover bg-center transition-transform duration-500 transform translate-x-full" style="background-image: url('https://placehold.co/1920x1080/000000/FFFFFF?text=Windows+8+Desktop+Background');">
+            <!-- Desktop Icons (simple placeholders) -->
+            <div class="p-8 flex flex-col gap-4">
+                <div class="desktop-icon text-white text-center cursor-pointer hover:scale-105 transition-transform duration-200" data-app="my-computer">
+                    <img src="https://placehold.co/64x64/FFFFFF/000000?text=PC" alt="My Computer" class="mx-auto mb-1 rounded-md">
+                    <span class="text-sm">My Computer</span>
+                </div>
+                <div class="desktop-icon text-white text-center cursor-pointer hover:scale-105 transition-transform duration-200" data-app="recycle-bin">
+                    <img src="https://placehold.co/64x64/FFFFFF/000000?text=Bin" alt="Recycle Bin" class="mx-auto mb-1 rounded-md">
+                    <span class="text-sm">Recycle Bin</span>
+                </div>
+                <!-- Add more desktop icons as needed -->
+            </div>
+
+            <!-- Desktop Taskbar -->
+            <div class="absolute bottom-0 left-0 right-0 h-16 bg-gray-800 bg-opacity-80 flex items-center justify-between px-8">
+                <button id="start-button-desktop" class="bg-blue-600 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 transition-colors duration-200 shadow-lg">
+                    Start
+                </button>
+                <div class="flex items-center gap-4">
+                    <span id="current-time-desktop" class="text-white text-xl font-medium"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- App Window Template (Hidden by default) -->
+        <div id="app-window-template" class="app-window absolute hidden bg-gray-900 rounded-lg shadow-xl overflow-hidden resize-none" style="width: 80%; height: 80%; top: 10%; left: 10%; min-width: 300px; min-height: 200px;">
+            <div class="app-header bg-gray-700 text-white p-3 flex items-center justify-between cursor-grab rounded-t-lg">
+                <span class="app-title text-lg font-semibold">App Title</span>
+                <div class="flex gap-2">
+                    <button class="app-minimize-button text-white hover:bg-gray-600 px-2 py-1 rounded-md">_</button>
+                    <button class="app-maximize-button text-white hover:bg-gray-600 px-2 py-1 rounded-md">⬜</button>
+                    <button class="app-close-button text-white hover:bg-red-500 px-2 py-1 rounded-md">X</button>
+                </div>
+            </div>
+            <div class="app-content p-4 text-white overflow-auto h-full">
+                <p>Welcome to the <span class="app-name-content"></span> app!</p>
+                <p>This is a simulated application window. You can drag it around, resize it, minimize, maximize, and close it.</p>
+                <!-- Specific app content will be injected here -->
+            </div>
+            <div class="app-resize-handle w-4 h-4 bg-gray-600 absolute bottom-0 right-0 cursor-nwse-resize rounded-br-lg"></div>
+        </div>
+
+        <!-- Custom Modal Container -->
+        <div id="custom-modal-container"></div>
+
+    </div>
+
+    <script>
+        // Global variables for Firebase (will be populated by the environment)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Simulate Firebase initialization (not actually used for this static simulator)
+        console.log('App ID:', appId);
+        console.log('Firebase Config:', firebaseConfig);
+        console.log('Initial Auth Token:', initialAuthToken ? 'present' : 'not present');
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const desktopScreen = document.getElementById('desktop-screen');
+        const desktopButtonStart = document.getElementById('desktop-button-start');
+        const startButtonDesktop = document.getElementById('start-button-desktop');
+        const powerButton = document.getElementById('power-button');
+        const currentTimeStart = document.getElementById('current-time-start');
+        const currentTimeDesktop = document.getElementById('current-time-desktop');
+        const tiles = document.querySelectorAll('.tile');
+        const appWindowTemplate = document.getElementById('app-window-template');
+        const customModalContainer = document.getElementById('custom-modal-container');
+
+        // Keep track of open app windows
+        const openAppWindows = {}; // { appName: DOMElement }
+        let zIndexCounter = 10; // For managing window layering
+
+        /**
+         * Displays a custom modal message.
+         * @param {string} message - The message to display.
+         * @param {string} type - 'alert' or 'confirm'.
+         * @param {function} onConfirm - Callback for confirm type.
+         * @param {function} onCancel - Callback for confirm type.
+         */
+        function showCustomModal(message, type = 'alert', onConfirm = null, onCancel = null) {
+            // Remove any existing modals
+            const existingModal = document.querySelector('.modal-overlay');
+            if (existingModal) {
+                existingModal.remove();
+            }
+
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'modal-overlay';
+
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+
+            const messageParagraph = document.createElement('p');
+            messageParagraph.className = 'text-gray-800 text-lg mb-4';
+            messageParagraph.textContent = message;
+
+            modalContent.appendChild(messageParagraph);
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'modal-buttons';
+
+            if (type === 'alert') {
+                const okButton = document.createElement('button');
+                okButton.className = 'bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200';
+                okButton.textContent = 'OK';
+                okButton.onclick = () => modalOverlay.remove();
+                buttonContainer.appendChild(okButton);
+            } else if (type === 'confirm') {
+                const confirmButton = document.createElement('button');
+                confirmButton.className = 'bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200';
+                confirmButton.textContent = 'Confirm';
+                confirmButton.onclick = () => {
+                    modalOverlay.remove();
+                    if (onConfirm) onConfirm();
+                };
+
+                const cancelButton = document.createElement('button');
+                cancelButton.className = 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md transition-colors duration-200';
+                cancelButton.textContent = 'Cancel';
+                cancelButton.onclick = () => {
+                    modalOverlay.remove();
+                    if (onCancel) onCancel();
+                };
+
+                buttonContainer.appendChild(confirmButton);
+                buttonContainer.appendChild(cancelButton);
+            }
+
+            modalContent.appendChild(buttonContainer);
+            modalOverlay.appendChild(modalContent);
+            customModalContainer.appendChild(modalOverlay);
+        }
+
+        /**
+         * Updates the current time displayed on the screen.
+         */
+        function updateTime() {
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit', hour12: true };
+            const timeString = now.toLocaleTimeString('en-US', options);
+            currentTimeStart.textContent = timeString;
+            currentTimeDesktop.textContent = timeString;
+        }
+
+        /**
+         * Toggles between the Start Screen and Desktop.
+         * @param {string} screen - 'start' or 'desktop'.
+         */
+        function toggleScreen(screen) {
+            if (screen === 'desktop') {
+                startScreen.classList.remove('translate-x-0');
+                startScreen.classList.add('-translate-x-full');
+                desktopScreen.classList.remove('translate-x-full');
+                desktopScreen.classList.add('translate-x-0');
+            } else { // 'start'
+                startScreen.classList.remove('-translate-x-full');
+                startScreen.classList.add('translate-x-0');
+                desktopScreen.classList.remove('translate-x-0');
+                desktopScreen.classList.add('translate-x-full');
+            }
+        }
+
+        /**
+         * Creates and manages an app window.
+         * @param {string} appName - The name of the app.
+         */
+        function openApp(appName) {
+            if (openAppWindows[appName]) {
+                // Bring existing window to front
+                openAppWindows[appName].style.zIndex = ++zIndexCounter;
+                return;
+            }
+
+            const appWindow = appWindowTemplate.cloneNode(true);
+            appWindow.id = `app-window-${appName}`;
+            appWindow.classList.remove('hidden');
+            appWindow.classList.add('flex', 'flex-col'); // Use flex for internal layout
+            appWindow.style.zIndex = ++zIndexCounter;
+
+            const appTitleElement = appWindow.querySelector('.app-title');
+            const appNameContentElement = appWindow.querySelector('.app-name-content');
+            const appContent = appWindow.querySelector('.app-content');
+
+            appTitleElement.textContent = appName.charAt(0).toUpperCase() + appName.slice(1) + ' App';
+            appNameContentElement.textContent = appName.charAt(0).toUpperCase() + appName.slice(1);
+
+            // Add specific content based on appName
+            switch (appName) {
+                case 'mail':
+                    appContent.innerHTML = `<p class="text-white">Welcome to your Mailbox! You have 3 new messages.</p><p class="text-white">From: John Doe<br>Subject: Meeting Reminder</p><p class="text-white">From: Jane Smith<br>Subject: Project Update</p>`;
+                    break;
+                case 'calendar':
+                    appContent.innerHTML = `<p class="text-white">Your Calendar for today, ${new Date().toLocaleDateString()}:</p><ul class="list-disc ml-5 text-white"><li>9:00 AM - Team Standup</li><li>1:00 PM - Project Review</li><li>3:00 PM - Client Call</li></ul>`;
+                    break;
+                case 'photos':
+                    appContent.innerHTML = `<p class="text-white">Your Photo Gallery:</p><div class="grid grid-cols-3 gap-2 mt-4">
+                        <img src="https://placehold.co/100x100/A0B2C3/FFFFFF?text=Pic1" class="rounded-md" alt="Photo 1">
+                        <img src="https://placehold.co/100x100/B2C3A0/FFFFFF?text=Pic2" class="rounded-md" alt="Photo 2">
+                        <img src="https://placehold.co/100x100/C3A0B2/FFFFFF?text=Pic3" class="rounded-md" alt="Photo 3">
+                        </div>`;
+                    break;
+                case 'store':
+                    appContent.innerHTML = `<p class="text-white">Welcome to the Windows Store! Browse apps, games, and more.</p><p class="text-white">Featured App: 'Simulator Pro' - Get it now!</p>`;
+                    break;
+                case 'music':
+                    appContent.innerHTML = `<p class="text-white">Now playing: "Simulator Anthem" by Virtual Band.</p><p class="text-white">Volume: <input type="range" class="w-full mt-2"></p>`;
+                    break;
+                case 'videos':
+                    appContent.innerHTML = `<p class="text-white">Watch your favorite videos here!</p><p class="text-white">Recommended: "The Simulator Story".</p>`;
+                    break;
+                case 'games':
+                    appContent.innerHTML = `<p class="text-white">Welcome to Games!</p><p class="text-white">Play 'Minesweeper' or 'Solitaire'. (Not implemented yet, but imagine it!)</p>`;
+                    break;
+                case 'word':
+                    appContent.innerHTML = `<textarea class="w-full h-full bg-gray-800 text-white p-2 rounded-md" placeholder="Start typing your document..."></textarea>`;
+                    break;
+                case 'excel':
+                    appContent.innerHTML = `<p class="text-white">Welcome to Excel!</p><p class="text-white">This is a placeholder for your spreadsheets.</p><table class="w-full bg-gray-800 text-white mt-4 rounded-md"><thead><tr><th class="p-2 border border-gray-700">A</th><th class="p-2 border border-gray-700">B</th></tr></thead><tbody><tr><td class="p-2 border border-gray-700">Data 1</td><td class="p-2 border border-gray-700">Data 2</td></tr><tr><td class="p-2 border border-gray-700">Data 3</td><td class="p-2 border border-gray-700">Data 4</td></tr></tbody></table>`;
+                    break;
+                case 'powerpoint':
+                    appContent.innerHTML = `<p class="text-white">Create stunning presentations with PowerPoint!</p><p class="text-white">Current Slide: 1 of 5</p>`;
+                    break;
+                case 'edge':
+                    appContent.innerHTML = `<iframe src="https://www.google.com" class="w-full h-full border-none rounded-md" title="Web Browser"></iframe><p class="text-xs text-gray-400 mt-2">Note: Some websites may block embedding in iframes.</p>`;
+                    break;
+                case 'my-computer':
+                    appContent.innerHTML = `<p class="text-white">My Computer:</p><ul class="list-disc ml-5 text-white"><li>Local Disk (C:)</li><li>Documents</li><li>Downloads</li></ul>`;
+                    break;
+                case 'recycle-bin':
+                    appContent.innerHTML = `<p class="text-white">Recycle Bin:</p><p class="text-white">It's empty! Good job keeping your system clean.</p>`;
+                    break;
+                default:
+                    appContent.innerHTML = `<p class="text-white">This is the default content for the ${appName} app.</p>`;
+            }
+
+            // Append to simulator container
+            document.getElementById('simulator-container').appendChild(appWindow);
+            openAppWindows[appName] = appWindow;
+
+            // Make window draggable
+            const appHeader = appWindow.querySelector('.app-header');
+            let isDragging = false;
+            let offsetX, offsetY;
+
+            appHeader.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetX = e.clientX - appWindow.getBoundingClientRect().left;
+                offsetY = e.clientY - appWindow.getBoundingClientRect().top;
+                appWindow.style.cursor = 'grabbing';
+                appWindow.style.zIndex = ++zIndexCounter; // Bring to front on drag start
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                appWindow.style.left = `${e.clientX - offsetX}px`;
+                appWindow.style.top = `${e.clientY - offsetY}px`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                appWindow.style.cursor = 'grab';
+            });
+
+            // Make window resizable
+            const resizeHandle = appWindow.querySelector('.app-resize-handle');
+            let isResizing = false;
+            let startX, startY, startWidth, startHeight;
+
+            resizeHandle.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = appWindow.offsetWidth;
+                startHeight = appWindow.offsetHeight;
+                e.preventDefault(); // Prevent text selection during resize
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                const newWidth = startWidth + (e.clientX - startX);
+                const newHeight = startHeight + (e.clientY - startY);
+
+                appWindow.style.width = `${Math.max(newWidth, 300)}px`; // Min width
+                appWindow.style.height = `${Math.max(newHeight, 200)}px`; // Min height
+            });
+
+            document.addEventListener('mouseup', () => {
+                isResizing = false;
+            });
+
+            // Window control buttons
+            appWindow.querySelector('.app-close-button').onclick = () => {
+                appWindow.remove();
+                delete openAppWindows[appName];
+            };
+
+            appWindow.querySelector('.app-minimize-button').onclick = () => {
+                appWindow.style.display = 'none'; // Simple minimize
+                // In a real OS, this would go to a taskbar icon
+            };
+
+            appWindow.querySelector('.app-maximize-button').onclick = () => {
+                if (appWindow.classList.contains('maximized')) {
+                    // Restore
+                    appWindow.classList.remove('maximized');
+                    appWindow.style.width = '80%';
+                    appWindow.style.height = '80%';
+                    appWindow.style.top = '10%';
+                    appWindow.style.left = '10%';
+                } else {
+                    // Maximize
+                    appWindow.classList.add('maximized');
+                    appWindow.style.width = '100%';
+                    appWindow.style.height = '100%';
+                    appWindow.style.top = '0';
+                    appWindow.style.left = '0';
+                }
+            };
+
+            // Re-show minimized window if clicked again
+            appWindow.addEventListener('click', () => {
+                if (appWindow.style.display === 'none') {
+                    appWindow.style.display = 'flex';
+                    appWindow.style.zIndex = ++zIndexCounter; // Bring to front
+                }
+            });
+        }
+
+        // Event Listeners
+        desktopButtonStart.addEventListener('click', () => toggleScreen('desktop'));
+        startButtonDesktop.addEventListener('click', () => toggleScreen('start'));
+
+        powerButton.addEventListener('click', () => {
+            showCustomModal('Are you sure you want to shut down the simulator?', 'confirm', () => {
+                document.body.innerHTML = '<div class="flex items-center justify-center h-screen w-screen bg-black text-white text-3xl">Shutting Down...</div>';
+            });
+        });
+
+        tiles.forEach(tile => {
+            tile.addEventListener('click', () => {
+                const appName = tile.dataset.app;
+                if (appName) {
+                    openApp(appName);
+                }
+            });
+        });
+
+        // Desktop icons
+        document.querySelectorAll('.desktop-icon').forEach(icon => {
+            icon.addEventListener('click', () => {
+                const appName = icon.dataset.app;
+                if (appName) {
+                    openApp(appName);
+                }
+            });
+        });
+
+        // Initial setup
+        updateTime();
+        setInterval(updateTime, 1000); // Update time every second
+
+        // Ensure app window is draggable even on touch devices
+        function setupTouchDrag(element, targetElement) {
+            let isDragging = false;
+            let offsetX, offsetY;
+
+            element.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                const touch = e.touches[0];
+                offsetX = touch.clientX - targetElement.getBoundingClientRect().left;
+                offsetY = touch.clientY - targetElement.getBoundingClientRect().top;
+                targetElement.style.cursor = 'grabbing';
+                targetElement.style.zIndex = ++zIndexCounter;
+                e.preventDefault(); // Prevent scrolling
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const touch = e.touches[0];
+                targetElement.style.left = `${touch.clientX - offsetX}px`;
+                targetElement.style.top = `${touch.clientY - offsetY}px`;
+                e.preventDefault(); // Prevent scrolling
+            });
+
+            document.addEventListener('touchend', () => {
+                isDragging = false;
+                targetElement.style.cursor = 'grab';
+            });
+        }
+
+        // Apply touch drag to app windows (after they are created)
+        // This needs to be called when an app window is opened
+        const originalOpenApp = openApp;
+        openApp = function(appName) {
+            originalOpenApp(appName); // Call the original function
+            const appWindow = openAppWindows[appName];
+            if (appWindow) {
+                const appHeader = appWindow.querySelector('.app-header');
+                setupTouchDrag(appHeader, appWindow);
+
+                // Touch resize (simplified for corner handle)
+                const resizeHandle = appWindow.querySelector('.app-resize-handle');
+                let isResizing = false;
+                let startX, startY, startWidth, startHeight;
+
+                resizeHandle.addEventListener('touchstart', (e) => {
+                    isResizing = true;
+                    const touch = e.touches[0];
+                    startX = touch.clientX;
+                    startY = touch.clientY;
+                    startWidth = appWindow.offsetWidth;
+                    startHeight = appWindow.offsetHeight;
+                    e.preventDefault();
+                });
+
+                document.addEventListener('touchmove', (e) => {
+                    if (!isResizing) return;
+                    const touch = e.touches[0];
+                    const newWidth = startWidth + (touch.clientX - startX);
+                    const newHeight = startHeight + (touch.clientY - startY);
+
+                    appWindow.style.width = `${Math.max(newWidth, 300)}px`;
+                    appWindow.style.height = `${Math.max(newHeight, 200)}px`;
+                    e.preventDefault();
+                });
+
+                document.addEventListener('touchend', () => {
+                    isResizing = false;
+                });
+            }
+        };
+
+    </script>
+</body>
+</html>
